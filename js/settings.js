@@ -2,6 +2,11 @@ import { DIRECTION } from './consts.js';
 
 export class Settings {
     constructor() {
+        this.game = {
+            ball: {
+                speedIncrease: 0.5
+            }
+        }
         this.gameField = {
             width: 800,
             height: 600            

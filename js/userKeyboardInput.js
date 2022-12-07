@@ -1,11 +1,9 @@
-import { DIRECTION } from './consts.js';
-
 export class UserKeyboardInput {
 
     constructor(players, keysMap) {
         this.players = players;
         this.keysMap = this.convertKeysMap(keysMap);
-        this.inputsByPlayer = this.players.reduce((acc) => { acc.push([]); return acc }, []);
+        this.inputsByPlayers = this.players.reduce((acc) => { acc.push([]); return acc }, []);
 
         this.eventKeyDownHandler = this.eventKeyDownHandler.bind(this);
         this.eventKeyUpHandler = this.eventKeyUpHandler.bind(this);
@@ -32,7 +30,7 @@ export class UserKeyboardInput {
                 Object.keys(map).map(key => parseInt(key, 10))
             ), [])
     }
-
+    
     eventKeyDownHandler(event) {
         const code = event.keyCode;
         const availableKeyCodes = this.getAvailableKeys(this.keysMap);
@@ -40,13 +38,38 @@ export class UserKeyboardInput {
         if (!availableKeyCodes.includes(code))
             return;
 
-        this.inputsByPlayer = this.keysMap.map(map => {
+        const currentInput = this.keysMap.map(map => {
             return map[code];
-        })
+        });
+
+        this.inputsByPlayers = this.inputsByPlayers.map((inputByPlayer, playerIndex) => {
+            const code = currentInput[playerIndex];
+            if (!code) return inputByPlayer;
+            if (inputByPlayer.includes(code)) return inputByPlayer;
+
+            return [...inputByPlayer, code]
+        });
     }
 
-    eventKeyUpHandler() {
-        this.inputsByPlayer = this.players.reduce((acc) => { acc.push([]); return acc }, []);
+    eventKeyUpHandler(event) {
+        const code = event.keyCode;
+        const availableKeyCodes = this.getAvailableKeys(this.keysMap);
+
+        if (!availableKeyCodes.includes(code))
+            return;
+
+        const currentInput = this.keysMap.map(map => {
+            return map[code];
+        });
+
+        this.inputsByPlayers = this.inputsByPlayers.map((inputByPlayer, playerIndex) => {
+            const code = currentInput[playerIndex];
+            
+            if (!code) return inputByPlayer;
+            if (!inputByPlayer.includes(code)) return inputByPlayer;
+
+            return inputByPlayer.filter(prevCode => prevCode !== code)
+        });
     }
 
     addEventListeners() {
@@ -60,6 +83,6 @@ export class UserKeyboardInput {
     }
 
     get() {
-        return this.inputsByPlayer;       
+        return this.inputsByPlayers;       
     }
 }

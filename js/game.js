@@ -65,15 +65,18 @@ export class Game {
         const playersMovements = this.userInput.get();
         
         this.players.forEach((player, index) => {
-            const movement = playersMovements[index];
+            const movements = playersMovements[index];
 
-            if (!movement) return;
+            if (!movements || movements.length === 0) return;
 
-            const canMove = this.field.canPlayerMove(player, movement);
+            movements.forEach(movement => {
+                const canMove = this.field.canPlayerMove(player, movement);
 
-            if (!canMove) return;
+                if (!canMove) return;
+                
+                player.move(movement);
+            })
             
-            player.move(movement);
         })
     }
     
@@ -115,6 +118,11 @@ export class Game {
         })
     }
 
+    increaseBallSpeed() {
+        const multy = this.score.reduce((sum, item) => sum + item);
+        this.ball.setSpeed(this.ball.speed + multy * this.settings.game.ball.speedIncrease)
+    }
+
     stopBall() {
         this.ball.setPosition(-9999, -9999);
         this.ball.setSpeed(0);
@@ -123,7 +131,8 @@ export class Game {
     async throwNewBall() {
         this.stopBall();
         await this.field.renderThrowNewBallScreen();
-        this.field.setObjectsStartParameters();        
+        this.field.setObjectsStartParameters();
+        this.increaseBallSpeed();
     }
 
     async reachGoal(player, score) {
@@ -132,6 +141,7 @@ export class Game {
         this.field.renderScore(this.score);
         await this.field.renderGoalScreen();
         this.field.setObjectsStartParameters();
+        this.increaseBallSpeed();
     }
 
     timeLoop() {
