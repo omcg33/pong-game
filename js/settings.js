@@ -8,7 +8,7 @@ export class Settings {
             }
         }
         this.gameField = {
-            width: 800,
+            width: 800, 
             height: 600            
         }
         this.playersInputMap = [

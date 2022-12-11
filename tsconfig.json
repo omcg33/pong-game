@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+      "target": "esnext",
+      "module": "esnext",      
+      "allowJs": false,
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "removeComments": false,
+      "preserveConstEnums": true,
+      "sourceMap": true,
+      "skipLibCheck": true,
+      "experimentalDecorators": true,
+      "baseUrl": ".",
+      "typeRoots": ["node_modules/@types"],
+      "lib": ["es2021", "es2017", "es2015", "dom"],
+      "strict": false,
+      "forceConsistentCasingInFileNames": true,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "incremental": false
+    },
+    "include": ["./**/*.ts"],
+    "exclude": ["node_modules"]
+  }
+  
