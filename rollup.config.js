@@ -7,7 +7,7 @@ export default {
     input: './src/index.ts',
     
     output: {
-        file: './dist/main.js',
+        file: './dist/index.js',
         format: 'iife',
     },
     plugins: [
