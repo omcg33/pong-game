@@ -3,6 +3,6 @@ import { DIRECTION } from "./enums"
 export type IMovement = DIRECTION
 
 export interface IUsersInput {
-    get(): IMovement[]
+    get(): IMovement[][]
     getMap(): string[][]
 }

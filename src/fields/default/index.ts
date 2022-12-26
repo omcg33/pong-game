@@ -1,6 +1,6 @@
 import { RelativePoint } from "../../interfaces/common";
 import { AbstractGameField } from "../../abstracts/gameField";
-import { IGameFieldParams } from "../../interfaces/gameField";
+import { IGameFieldObjects, IGameFieldParams } from "../../interfaces/gameField";
 import { IPlayerSettings, Player } from "./objects/player";
 import { convertRelativePointToPoint } from "../../helpers";
 
@@ -33,6 +33,7 @@ export class GameField extends AbstractGameField {
     private _settings: IGameFieldSettings;
     private _players: Player[];
     private _physics: any;
+    private _objects: (Player)[];
 
     constructor(params: IGameFieldParams) {
         super(params);
@@ -93,9 +94,7 @@ export class GameField extends AbstractGameField {
             ['score', new Canvas(node, { width, height, zIndex: zIndex + 10 })],
             ['main', new Canvas(node, { width, height, zIndex })],
             ['briefing', new Canvas(node, { width, height, zIndex: zIndex + 10 })],
-        ])
-
-        this._players = this._settings.players.map(settings => this._createPlayer(settings));
+        ])        
         
         this._layers.forEach(layer => layer.hide());
     }
@@ -109,7 +108,7 @@ export class GameField extends AbstractGameField {
         const middleYposition = (start.y + (end.y - start.y) / 2) ;
 
         return {
-            x: start[0] * fieldWidth - (width / 2),
+            x: start.x * fieldWidth - (width / 2),
             y: middleYposition * fieldHeight - (height / 2),
 
             width,
@@ -117,10 +116,20 @@ export class GameField extends AbstractGameField {
         }
     }
 
+    private _getPlayerAvailableArea(settings: IGameFieldPlayerSettings) {
+        const { width, height } = this._settings;
+
+        return {
+            start: convertRelativePointToPoint(settings.start, width, height),
+            end: convertRelativePointToPoint(settings.end, width, height),
+        }
+    }
+
     private _createPlayer(settings: IGameFieldPlayerSettings): Player {
         const { color, speed } = settings;
           
         const { width, height, x, y } = this._getPlayerParams(settings);
+        const availableArea = this._getPlayerAvailableArea(settings);
 
         return new Player({
             x,
@@ -132,7 +141,8 @@ export class GameField extends AbstractGameField {
             speed,
 
             physics: this._physics,
-            canvas:  this._layers.get('main')
+            canvas: this._layers.get('main'),
+            availableArea,
         })
     }
 
@@ -144,8 +154,15 @@ export class GameField extends AbstractGameField {
         this._layers.forEach(layer => layer.hide())
     }
     
+    clear() {
+        const canvas = this._layers.get('main').clear();
+    }
+    render() {
+        this._objects.forEach(obj => obj.draw())
+    }
+
     renderBackground(): void {
-        const { width, height, colors } = this._settings;
+        const { width, height, colors, players } = this._settings;
         const canvas = this._layers.get('background');
         canvas.show();
 
@@ -161,13 +178,16 @@ export class GameField extends AbstractGameField {
         canvas.drawCircle((width / 2), (height / 2), (height / 4), { fillColor, lineWidth, lineColor }) 
  
         // Рисуем линии для игроков
-        // players.forEach(player => {
-        //     canvas.drawLine(
-        //         width*player['start'][0],  height*player['start'][1],
-        //         width*player['end'][0], height*player['end'][1],
-        //         { lineColor, lineWidth }
-        //     )
-        // })
+        players.forEach(player => {
+            const startPoint = convertRelativePointToPoint(player.start, width, height);
+            const endPoint = convertRelativePointToPoint(player.end, width, height);
+
+            canvas.drawLine(
+                startPoint.x, startPoint.y,
+                endPoint.x, endPoint.y,
+                { color: lineColor, width: lineWidth }
+            )
+        })
 
     }
 
@@ -186,5 +206,16 @@ export class GameField extends AbstractGameField {
         })
     }
     
+    createObjects() {
+        this._players = this._settings.players.map(settings => this._createPlayer(settings));
+        
+        this._objects = [
+            ...this._players
+        ]
+
+        return {
+            players: this._players
+        }
+    }
 
 }

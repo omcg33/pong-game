@@ -3,6 +3,9 @@ import { DIRECTION } from "src/interfaces/enums";
 import { IPlayer } from "../../interfaces/objects/player";
 
 export class AbstractPlayer implements IPlayer {
+    canMove(direction: DIRECTION): boolean {
+        throw new Error("Method not implemented.");
+    }
     getPosition(): Point {
         throw new Error("Method not implemented.");
     }

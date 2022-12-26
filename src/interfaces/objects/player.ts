@@ -5,5 +5,6 @@ export interface IPlayer {
     getPosition(): Point;
     setPosition(point: Point): void;
     move(direction: DIRECTION): void;
+    canMove(direction: DIRECTION): boolean;
     draw(): void;
 }

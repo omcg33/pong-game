@@ -1,7 +1,10 @@
-import { IGameFieldParams, IGameField, Score } from "src/interfaces/gameField";
+import { IGameFieldParams, IGameField, Score, IGameFieldObjects } from "src/interfaces/gameField";
 
 export class AbstractGameField implements IGameField {
     constructor(params: IGameFieldParams) {      
+    }
+    createObjects(): IGameFieldObjects {
+        throw new Error("Method not implemented.");
     }
     renderBriefing(): void {
         throw new Error("Method not implemented.");
@@ -16,9 +19,6 @@ export class AbstractGameField implements IGameField {
         throw new Error("Method not implemented.");
     }
     renderScore(score: Score): void {
-        throw new Error("Method not implemented.");
-    }
-    createObjects(): void {
         throw new Error("Method not implemented.");
     }
     resetObjects(): void {
