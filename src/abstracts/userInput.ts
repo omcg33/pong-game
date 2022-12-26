@@ -1,7 +1,10 @@
-import { DIRECTION } from "src/interfaces/enums";
-import { IUserInput } from "src/interfaces/userInput";
+import { DIRECTION } from "../interfaces/enums";
+import { IUsersInput } from "../interfaces/userInput";
 
-export class AbstractUserInput implements IUserInput {
+export class AbstractUsersInput implements IUsersInput {
+    getMap(): string[][] {
+        throw new Error("Method not implemented.");
+    }
     get(): DIRECTION[] {
         throw new Error("Method not implemented.");
     }    

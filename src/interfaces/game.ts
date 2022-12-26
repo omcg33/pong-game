@@ -1,16 +1,14 @@
-import { AbstractCanvas } from "src/abstracts/canvas";
-import { AbstractGameInterface } from "src/abstracts/gameInterface";
-import { Settings } from "src/helpers/settings"
+import { AbstractCanvas } from "../abstracts/canvas";
+import { AbstractGameInterface } from "../abstracts/gameInterface";
 import { AbstractGameField } from "../abstracts/gameField"
-import { AbstractUserInput } from "../abstracts/userInput"
+import { AbstractUsersInput } from "../abstracts/userInput"
 
 export interface IGameParams {
-    node: HTMLElement;
-    settings: Settings;
+    node: HTMLElement;    
     Interface: typeof AbstractGameInterface
     Canvas: typeof AbstractCanvas
     Field: typeof AbstractGameField
-    UserInput: typeof AbstractUserInput
+    UserInput: typeof AbstractUsersInput
 }
 
 export interface IGame {
