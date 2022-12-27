@@ -1,3 +1,4 @@
+import { AbstractBall } from "src/abstracts/objects/ball";
 import { AbstractPlayer } from "src/abstracts/objects/player";
 import { AbstractCanvas } from "../abstracts/canvas";
 
@@ -5,6 +6,7 @@ export type Score = number[];
 
 export interface IGameFieldObjects {
     players: AbstractPlayer[]
+    ball: AbstractBall
 }
 
 export interface IGameFieldParams {
@@ -25,6 +27,9 @@ export interface IGameField {
     show(): void;
     hide(): void;
     clear(): void;
+    clearBackground(): void;
+    clearBriefing(): void;
+
     render(): void;
     renderBriefing(): void;
     renderBackground(): void;

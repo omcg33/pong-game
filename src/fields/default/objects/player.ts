@@ -1,7 +1,6 @@
 import { DIRECTION } from "../../../interfaces/enums";
 import { IMovement } from "../../../interfaces/userInput";
 import { AbstractPlayer } from "../../../abstracts/objects/player";
-import { convertRelativePointToPoint } from "src/helpers";
 
 export interface IPlayerSettings {
     x: number;

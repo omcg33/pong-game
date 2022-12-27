@@ -2,9 +2,9 @@ import { System } from 'detect-collisions';
 
 import { AbstractGameField } from "./abstracts/gameField";
 import { AbstractGameInterface } from "./abstracts/gameInterface";
+import { AbstractBall } from './abstracts/objects/ball';
 import { AbstractPlayer } from './abstracts/objects/player';
 import { AbstractUsersInput } from './abstracts/userInput';
-import { UsersKeyboardInput } from './inputs/keyboard';
 import { IGame, IGameParams } from "./interfaces/game";
 
 export class Game implements IGame {
@@ -12,7 +12,9 @@ export class Game implements IGame {
     private _field: AbstractGameField;
     private _usersInput: AbstractUsersInput;
 
+    private _ball: AbstractBall;
     private _players: AbstractPlayer[];
+
     private _isLoopActive: boolean = true;
 
     constructor(params: IGameParams) {
@@ -37,6 +39,8 @@ export class Game implements IGame {
         this._field.renderBriefing();
         await this._interface.renderStartScreen();
         this._interface.hide();
+        this._field.clearBriefing();
+        this._field.clearBackground();
         this._field.hide();
         this._startNewGame();    
     }
@@ -45,8 +49,9 @@ export class Game implements IGame {
         this._field.show();
         this._field.renderBackground();
 
-        const { players } = this._field.createObjects();
-                
+        const { players, ball } = this._field.createObjects();
+               
+        this._ball = ball;
         this._players = players;
         
         this._isLoopActive = true;
@@ -65,11 +70,8 @@ export class Game implements IGame {
         }       
     }
 
-    private _processLogic() {
-        // this.ball.setPosition(
-        //     this.ball.x + this.ball.dx * this.ball.speed,
-        //     this.ball.y + this.ball.dy * this.ball.speed,
-        // );
+    private _processLogic() {        
+        this._ball.move();
 
         const playersMovements = this._usersInput.get();
         

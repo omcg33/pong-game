@@ -5,10 +5,7 @@ export class AbstractGameField implements IGameField {
     }
     createObjects(): IGameFieldObjects {
         throw new Error("Method not implemented.");
-    }
-    renderBriefing(): void {
-        throw new Error("Method not implemented.");
-    }
+    }   
     show(): void {
         throw new Error("Method not implemented.");
     }
@@ -16,6 +13,15 @@ export class AbstractGameField implements IGameField {
         throw new Error("Method not implemented.");
     }
     renderBackground(): void {
+        throw new Error("Method not implemented.");
+    }
+    clearBackground(): void {
+        throw new Error("Method not implemented.");
+    }
+    renderBriefing(): void {
+        throw new Error("Method not implemented.");
+    }
+    clearBriefing(): void {
         throw new Error("Method not implemented.");
     }
     renderScore(score: Score): void {

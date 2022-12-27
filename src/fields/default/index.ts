@@ -3,6 +3,7 @@ import { AbstractGameField } from "../../abstracts/gameField";
 import { IGameFieldObjects, IGameFieldParams } from "../../interfaces/gameField";
 import { IPlayerSettings, Player } from "./objects/player";
 import { convertRelativePointToPoint } from "../../helpers";
+import { Ball } from "./objects/ball";
 
 interface INavigationSettings {
     start: RelativePoint;
@@ -17,23 +18,55 @@ interface IGameFieldPlayerSettings {
     color: string;
 }
 
+const COLORS = {
+    background: {
+        main: '#333',
+        secondary: '#999',
+    },
+    text: {
+        main: '#fff',
+        secondary: '#666'
+    },
+    border: {
+        main: '#666',
+        secondary: '#232323'
+    },
+    players: [
+        {
+            main: '#ff00e1'
+        },
+        {
+            main: '#00ff02'
+        }
+    ],
+    ball: {
+        fill: '#fff'
+    }  
+};
+
 export interface IGameFieldSettings {
     width: number;
-    height: number;
-    colors: Record<string, Record<string, string>>;
+    height: number;   
     inputsMap: string[][];
     briefing: {
         navigation: INavigationSettings[]
-    },
-    players: IGameFieldPlayerSettings[]
+    };
+    players: IGameFieldPlayerSettings[];
+    ball: {
+        radius: number;
+        speed: number;
+    }
 }
 
 export class GameField extends AbstractGameField {   
     private _layers: Map<string, any>;
     private _settings: IGameFieldSettings;
+
+    private _ball: Ball;
     private _players: Player[];
+
     private _physics: any;
-    private _objects: (Player)[];
+    private _objects: (Player | Ball)[];
 
     constructor(params: IGameFieldParams) {
         super(params);
@@ -51,42 +84,32 @@ export class GameField extends AbstractGameField {
                     end: { x: 0.05, y: 0.9 },
                     size: 0.2,
                     speed: 5,
-                    color: '#ff00e1',
+                    color: COLORS.players[0].main
                 },
                 {
                     start: { x: 0.95, y: 0.1 },
                     end: { x: 0.95, y: 0.9},
                     size: 0.2,
                     speed: 5,
-                    color: '#00ff02'
+                    color: COLORS.players[1].main
                 }
             ],
             briefing: {
                 navigation: [
                     {
                         start: { x: 0.1, y: 0.5 },
-                        color: '#ff00e1'
+                        color: COLORS.players[0].main
                     },
                     {
                         start: { x: 0.9, y: 0.5 } ,
-                        color: '#00ff02'
+                        color: COLORS.players[1].main
                     }
                 ]
             },
-            colors: {
-                background: {
-                    main: '#333',
-                    secondary: '#999',
-                },
-                text: {
-                    main: '#fff',
-                    secondary: '#666'
-                },
-                border: {
-                    main: '#666',
-                    secondary: '#232323'
-                },                
-            }         
+            ball: {
+                radius: 0.015,
+                speed: 0.01
+            }                  
         }
 
         this._layers = new Map([
@@ -155,20 +178,20 @@ export class GameField extends AbstractGameField {
     }
     
     clear() {
-        const canvas = this._layers.get('main').clear();
+        this._layers.get('main').clear();
     }
     render() {
         this._objects.forEach(obj => obj.draw())
     }
 
     renderBackground(): void {
-        const { width, height, colors, players } = this._settings;
+        const { width, height, players } = this._settings;
         const canvas = this._layers.get('background');
         canvas.show();
 
         const lineWidth = 4;
-        const fillColor = colors.background.main;
-        const lineColor = colors.border.main;
+        const fillColor = COLORS.background.main;
+        const lineColor = COLORS.border.main;
 
         // Рисуем газон
         canvas.drawRectangle(0, 0, width, height, { radius: 20, fillColor })       
@@ -191,6 +214,10 @@ export class GameField extends AbstractGameField {
 
     }
 
+    clearBackground() {
+        this._layers.get('background').clear();
+    }
+    
     renderBriefing(): void {
         const { width, height, briefing: { navigation }, inputsMap } = this._settings;
         const canvas = this._layers.get('briefing');
@@ -206,15 +233,36 @@ export class GameField extends AbstractGameField {
         })
     }
     
+    clearBriefing() {
+        this._layers.get('briefing').clear();
+    }
+
     createObjects() {
+        const { width, height, ball, } = this._settings;
+
+        this._ball = new Ball({
+            x: width / 2 ,
+            y: height / 2,
+            dx: 1,
+            dy: 0,
+            speed: Math.round(width * ball.speed),
+            color: COLORS.ball.fill,
+            radius: Math.round(width * ball.radius),
+
+            physics: this._physics,
+            canvas: this._layers.get('main'),           
+        });
+
         this._players = this._settings.players.map(settings => this._createPlayer(settings));
         
         this._objects = [
-            ...this._players
+            ...this._players,
+            this._ball
         ]
 
         return {
-            players: this._players
+            players: this._players,
+            ball: this._ball
         }
     }
 
