@@ -3,6 +3,8 @@ import { DIRECTION } from "src/interfaces/enums";
 import { IPlayer } from "../../interfaces/objects/player";
 
 export class AbstractPlayer implements IPlayer {
+    public physicShape: any;
+
     canMove(direction: DIRECTION): boolean {
         throw new Error("Method not implemented.");
     }

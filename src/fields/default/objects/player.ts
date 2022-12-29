@@ -22,7 +22,6 @@ export class Player extends AbstractPlayer {
     private _color: string;
 
     private _physics: any;
-    private _physicShape: any;
     private _canvas: any;
     private _availableArea: any;
 
@@ -40,7 +39,7 @@ export class Player extends AbstractPlayer {
         this._physics = physics;
         this._availableArea = availableArea;
 
-        this._physicShape = this._physics.createBox({ x, y }, this._width, this._height, { isStatic: false });
+        this.physicShape = this._physics.createBox({ x, y }, this._width, this._height, { isStatic: false });
     }
 
     canMove(movement: IMovement): boolean {
@@ -65,13 +64,13 @@ export class Player extends AbstractPlayer {
 
     getPosition() {
         return {
-            x: this._physicShape.x,
-            y: this._physicShape.y,
+            x: this.physicShape.x,
+            y: this.physicShape.y,
         }
     }
 
     setPosition(point) {
-        this._physicShape.setPosition(point.x, point.y)
+        this.physicShape.setPosition(point.x, point.y)
     }
     
     move(direction) {

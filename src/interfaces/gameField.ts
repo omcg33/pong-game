@@ -1,12 +1,14 @@
-import { AbstractBall } from "src/abstracts/objects/ball";
-import { AbstractPlayer } from "src/abstracts/objects/player";
+import { AbstractBall } from "../abstracts/objects/ball";
+import { AbstractPlayer } from "../abstracts/objects/player";
 import { AbstractCanvas } from "../abstracts/canvas";
+import { AbstractScoreTrigger } from "../abstracts/objects/scoreTrigger";
 
 export type Score = number[];
 
 export interface IGameFieldObjects {
     players: AbstractPlayer[]
     ball: AbstractBall
+    triggers: AbstractScoreTrigger[]
 }
 
 export interface IGameFieldParams {

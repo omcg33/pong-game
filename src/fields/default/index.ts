@@ -1,9 +1,11 @@
 import { RelativePoint } from "../../interfaces/common";
 import { AbstractGameField } from "../../abstracts/gameField";
-import { IGameFieldObjects, IGameFieldParams } from "../../interfaces/gameField";
+import { IGameFieldParams } from "../../interfaces/gameField";
 import { IPlayerSettings, Player } from "./objects/player";
 import { convertRelativePointToPoint } from "../../helpers";
 import { Ball } from "./objects/ball";
+import { Wall } from "./objects/wall";
+import { ScoreTrigger } from "./objects/scoreTrigger";
 
 interface INavigationSettings {
     start: RelativePoint;
@@ -66,7 +68,7 @@ export class GameField extends AbstractGameField {
     private _players: Player[];
 
     private _physics: any;
-    private _objects: (Player | Ball)[];
+    private _objects: (Player | Ball | Wall)[];
 
     constructor(params: IGameFieldParams) {
         super(params);
@@ -169,6 +171,62 @@ export class GameField extends AbstractGameField {
         })
     }
 
+    private _createWalls() {
+        const { width, height } = this._settings;
+
+        return [
+            new Wall({
+                x: 0,
+                y: 0,
+                width: width,
+                height: 1,
+                color: 'rgba(0,0,0,0)',
+                physics: this._physics,
+                canvas: this._layers.get('main'),
+            }),
+            new Wall({
+                x: 0,
+                y: height,
+                width: width,
+                height: 1,
+                color: 'rgba(0,0,0,0)',
+                physics: this._physics,
+                canvas: this._layers.get('main'),
+            })
+        ]
+    }
+
+    private _createScoreTriggers(players: Player[], ballRadius: number ) {
+        const { width, height } = this._settings;
+
+        return [
+            new ScoreTrigger(
+                players[0],
+                {
+                    x: 0 - ballRadius * 2,
+                    y: 0,
+                    width: 1,
+                    height: height,                
+                    color: 'rgba(0,0,0,0)',
+                    physics: this._physics,
+                    canvas: this._layers.get('main'),
+                }
+             ),
+             new ScoreTrigger(
+                players[1],
+                {
+                    x: width + ballRadius * 2,
+                    y: 0,
+                    width: 1,
+                    height,                                
+                    color: 'rgba(0,0,0,0)',
+                    physics: this._physics,
+                    canvas: this._layers.get('main'),
+                }
+             )
+        ]
+    }
+
     show() {
         this._layers.forEach(layer => layer.show())
     }
@@ -180,11 +238,12 @@ export class GameField extends AbstractGameField {
     clear() {
         this._layers.get('main').clear();
     }
+
     render() {
         this._objects.forEach(obj => obj.draw())
     }
 
-    renderBackground(): void {
+    renderBackground() {
         const { width, height, players } = this._settings;
         const canvas = this._layers.get('background');
         canvas.show();
@@ -218,7 +277,7 @@ export class GameField extends AbstractGameField {
         this._layers.get('background').clear();
     }
     
-    renderBriefing(): void {
+    renderBriefing() {
         const { width, height, briefing: { navigation }, inputsMap } = this._settings;
         const canvas = this._layers.get('briefing');
         canvas.clear();
@@ -239,31 +298,36 @@ export class GameField extends AbstractGameField {
 
     createObjects() {
         const { width, height, ball, } = this._settings;
+        const ballRadius = Math.round(width * ball.radius);
 
         this._ball = new Ball({
             x: width / 2 ,
             y: height / 2,
             dx: 1,
-            dy: 0,
+            dy: 1,
             speed: Math.round(width * ball.speed),
             color: COLORS.ball.fill,
-            radius: Math.round(width * ball.radius),
+            radius: ballRadius,
 
             physics: this._physics,
             canvas: this._layers.get('main'),           
         });
-
         this._players = this._settings.players.map(settings => this._createPlayer(settings));
+        
+        const triggers = this._createScoreTriggers(this._players, ballRadius );
+        const walls = this._createWalls();
         
         this._objects = [
             ...this._players,
+            ...walls,
+            ...triggers,
             this._ball
         ]
 
         return {
             players: this._players,
-            ball: this._ball
+            ball: this._ball,
+            triggers,
         }
     }
-
 }

@@ -4,3 +4,8 @@ export type Point = {
 }
 
 export type RelativePoint = Point;
+
+export type VectorN = {
+    x: number;
+    y: number;
+}

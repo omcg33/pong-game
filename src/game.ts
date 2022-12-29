@@ -4,6 +4,7 @@ import { AbstractGameField } from "./abstracts/gameField";
 import { AbstractGameInterface } from "./abstracts/gameInterface";
 import { AbstractBall } from './abstracts/objects/ball';
 import { AbstractPlayer } from './abstracts/objects/player';
+import { AbstractScoreTrigger } from './abstracts/objects/scoreTrigger';
 import { AbstractUsersInput } from './abstracts/userInput';
 import { IGame, IGameParams } from "./interfaces/game";
 
@@ -11,9 +12,11 @@ export class Game implements IGame {
     private _interface: AbstractGameInterface;
     private _field: AbstractGameField;
     private _usersInput: AbstractUsersInput;
+    private _physics: any;
 
     private _ball: AbstractBall;
     private _players: AbstractPlayer[];
+    private _triggers: AbstractScoreTrigger[];
 
     private _isLoopActive: boolean = true;
 
@@ -22,13 +25,11 @@ export class Game implements IGame {
         const width = node.offsetWidth;
         const height = node.offsetHeight;
 
-        const physics = new System();
-
+        this._physics = new System();
         this._usersInput = new UserInput();
         this._interface = new Interface({ node, width, height, Canvas, zIndex: 100 });
-        this._field = new Field({ node, width, height, physics, Canvas, zIndex: 50, inputsMap: this._usersInput.getMap() });
+        this._field = new Field({ node, width, height, physics: this._physics, Canvas, zIndex: 50, inputsMap: this._usersInput.getMap() });
 
-        // this._startNewGame();
         this._init();
     }
 
@@ -49,20 +50,20 @@ export class Game implements IGame {
         this._field.show();
         this._field.renderBackground();
 
-        const { players, ball } = this._field.createObjects();
+        const { players, ball, triggers } = this._field.createObjects();
                
         this._ball = ball;
         this._players = players;
+        this._triggers = triggers;
         
         this._isLoopActive = true;
         this._timeLoop()
     }
 
-
     private _timeLoop() {
         this._field.clear();
         this._processLogic();
-        // this.checkCollisions();        
+        this._checkCollisions();
         this._field.render();
        
         if (this._isLoopActive) {
@@ -86,4 +87,40 @@ export class Game implements IGame {
             
         })
     }
+
+    _checkCollisions() {
+        this._physics.checkAll(({ a, b, overlapV, overlapN }) => {
+            const isAisBall = a === this._ball.physicShape;
+            const trigger = this._triggers.find(trigger => b === trigger.physicShape);
+            
+            const player = this._players.find(player => b === player.physicShape); 
+
+            if (isAisBall) {
+                this._ball.updateDirection(overlapN)
+
+                // if (trigger) {
+                //     const lastTouchedPlayer = this.ball.lastTouchedPlayer;
+
+                //     if (!lastTouchedPlayer) {
+                //         this.throwNewBall()
+                //         return;
+                //     }
+
+                //     if (trigger.player === lastTouchedPlayer) {
+                //         this.reachGoal(lastTouchedPlayer, -1);
+                //         return;
+                //     }
+
+                //     this.reachGoal(lastTouchedPlayer, 1);
+                //     return;
+                // }
+                
+                // if (player) {
+                //     this.ball.setLastTouchedPlayer(player)
+                // }
+            }
+
+        })
+    }
+
 } 

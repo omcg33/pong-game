@@ -1,3 +1,4 @@
+import { VectorN } from "../../../interfaces/common";
 import { AbstractBall } from "../../../abstracts/objects/ball";
 
 export interface IBallSettings {
@@ -22,8 +23,7 @@ export class Ball extends AbstractBall {
     private _speed: number;
     private _color: string;
 
-    private _physics: any;
-    private _physicShape: any;
+    private _physics: any;    
     private _canvas: any;
     
     constructor(settings: IBallSettings) {
@@ -38,18 +38,18 @@ export class Ball extends AbstractBall {
 
         this._canvas = canvas;
         this._physics = physics;
-        this._physicShape = this._physics.createCircle({ x, y }, this._radius);
+        this.physicShape = this._physics.createCircle({ x, y }, this._radius);
     }
 
     getPosition() {
         return {
-            x: this._physicShape.x,
-            y: this._physicShape.y,
+            x: this.physicShape.x,
+            y: this.physicShape.y,
         }
     }
 
     setPosition(point) {
-        this._physicShape.setPosition(point.x, point.y)
+        this.physicShape.setPosition(point.x, point.y)
     }
 
     setDirection(dx, dy) {
@@ -57,16 +57,16 @@ export class Ball extends AbstractBall {
         this._dy = dy;
     }
 
-    setSpeed(speed) {
+    setSpeed(speed: number) {
         this._speed = speed;
     }
 
-    // updateDirection(vectorNormal) {
-    //     const { x, y } = vectorNormal;
+    updateDirection(vectorN: VectorN) {
+        const { x, y } = vectorN;
 
-    //     if (x !== 0 ) this.dx *= -1;
-    //     if (y !== 0 ) this.dy *= -1;
-    // }
+        if (x !== 0 ) this._dx *= -1;
+        if (y !== 0 ) this._dy *= -1;
+    }
 
     // setLastTouchedPlayer(player) {
     //     this.lastTouchedPlayer = player

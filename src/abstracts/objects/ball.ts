@@ -1,7 +1,12 @@
-import { Point } from "src/interfaces/common";
+import { Point, VectorN } from "src/interfaces/common";
 import { IBall } from "../../interfaces/objects/ball";
 
 export class AbstractBall implements IBall {
+    updateDirection(vectorN: VectorN): void {
+        throw new Error("Method not implemented.");
+    }
+    public physicShape: any;
+
     move(): void {
         throw new Error("Method not implemented.");
     }
