@@ -18,6 +18,8 @@ export class Game implements IGame {
     private _players: AbstractPlayer[];
     private _triggers: AbstractScoreTrigger[];
 
+    private _lastBallTouchedPlayer: AbstractPlayer;
+    private _score: number[];
     private _isLoopActive: boolean = true;
 
     constructor(params: IGameParams) {
@@ -56,6 +58,10 @@ export class Game implements IGame {
         this._players = players;
         this._triggers = triggers;
         
+        this._score = Array(players.length).fill(0);
+        this._field.renderScore(this._score);
+        this._field.throwBall(this._ball);
+
         this._isLoopActive = true;
         this._timeLoop()
     }
@@ -88,39 +94,72 @@ export class Game implements IGame {
         })
     }
 
-    _checkCollisions() {
-        this._physics.checkAll(({ a, b, overlapV, overlapN }) => {
+    private _checkCollisions() {
+        this._physics.checkAll(({ a, b, overlapN }) => {
             const isAisBall = a === this._ball.physicShape;
             const trigger = this._triggers.find(trigger => b === trigger.physicShape);
-            
             const player = this._players.find(player => b === player.physicShape); 
 
             if (isAisBall) {
                 this._ball.updateDirection(overlapN)
 
-                // if (trigger) {
-                //     const lastTouchedPlayer = this.ball.lastTouchedPlayer;
+                if (trigger) {
+                    const lastTouchedPlayer = this._lastBallTouchedPlayer;
 
-                //     if (!lastTouchedPlayer) {
-                //         this.throwNewBall()
-                //         return;
-                //     }
+                    if (!lastTouchedPlayer) {
+                        this._throwNewBall()
+                        return;
+                    }
 
-                //     if (trigger.player === lastTouchedPlayer) {
-                //         this.reachGoal(lastTouchedPlayer, -1);
-                //         return;
-                //     }
+                    if (trigger.player === lastTouchedPlayer) {
+                        this._reachGoal(lastTouchedPlayer, -1);
+                        return;
+                    }
 
-                //     this.reachGoal(lastTouchedPlayer, 1);
-                //     return;
-                // }
+                    this._reachGoal(lastTouchedPlayer, 1);
+                    return;
+                }
                 
-                // if (player) {
-                //     this.ball.setLastTouchedPlayer(player)
-                // }
+                if (player) {
+                    this._lastBallTouchedPlayer = player;
+                }
             }
 
         })
     }
+    
+    private _getNewScore(player, increment) {
+        const playerIndex = this._players.indexOf(player);
 
+        return this._score.map((playerScore, index) => {
+            if (index !== playerIndex) return playerScore;
+
+            return playerScore + increment
+        })
+    }
+
+    private _stopBall() {  
+        this._ball.setPosition({x: -99999, y: -99999})      
+        this._ball.setSpeed(0)
+    }
+
+    private async _throwNewBall() {
+        const speed = this._ball.getSpeed();
+
+        this._lastBallTouchedPlayer = undefined;
+        this._stopBall();
+        await this._field.renderThrowNewBallScreen();
+        this._field.throwBall(this._ball, speed);
+    }
+
+    private async _reachGoal(player, increment) {
+        const speed = this._ball.getSpeed();
+
+        this._lastBallTouchedPlayer = undefined;
+        this._stopBall();
+        this._score = this._getNewScore(player, increment)
+        this._field.renderScore(this._score);
+        await this._field.renderGoalScreen();
+        this._field.throwBall(this._ball, speed * 1.05);
+    }
 } 

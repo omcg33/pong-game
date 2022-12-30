@@ -1,11 +1,12 @@
-import { RelativePoint } from "../../interfaces/common";
+import { Radians, RelativePoint } from "../../interfaces/common";
 import { AbstractGameField } from "../../abstracts/gameField";
 import { IGameFieldParams } from "../../interfaces/gameField";
 import { IPlayerSettings, Player } from "./objects/player";
-import { convertRelativePointToPoint } from "../../helpers";
+import { convertAngleToCoordinatesChanges, convertRelativePointToPoint, timeout } from "../../helpers";
 import { Ball } from "./objects/ball";
 import { Wall } from "./objects/wall";
 import { ScoreTrigger } from "./objects/scoreTrigger";
+import { IBall } from "src/interfaces/objects/ball";
 
 interface INavigationSettings {
     start: RelativePoint;
@@ -50,6 +51,11 @@ export interface IGameFieldSettings {
     width: number;
     height: number;   
     inputsMap: string[][];
+    score: {
+        start: RelativePoint;
+        end: RelativePoint;    
+        fontSize: number;
+    },
     briefing: {
         navigation: INavigationSettings[]
     };
@@ -57,7 +63,8 @@ export interface IGameFieldSettings {
     ball: {
         radius: number;
         speed: number;
-    }
+    },
+    disabledBallDirectionAreas: Radians[][]
 }
 
 export class GameField extends AbstractGameField {   
@@ -80,6 +87,11 @@ export class GameField extends AbstractGameField {
             width,
             height,
             inputsMap,
+            score: {
+                start: { x: 0.4, y: 0.05 },
+                end: { x: 0.6, y: 0.05 },
+                fontSize: 40,
+            },
             players: [
                 {
                     start: { x: 0.05, y: 0.1 },
@@ -111,14 +123,17 @@ export class GameField extends AbstractGameField {
             ball: {
                 radius: 0.015,
                 speed: 0.01
-            }                  
+            },
+            disabledBallDirectionAreas: [
+                [0, 0.6], [1.27, 1.87], [2.54, 3.74], [4.41, 5.01], [5.68, 6.28]
+            ]
         }
 
         this._layers = new Map([
-            ['background', new Canvas(node, { width, height, zIndex: zIndex - 10 })],
-            ['score', new Canvas(node, { width, height, zIndex: zIndex + 10 })],
+            ['background', new Canvas(node, { width, height, zIndex: zIndex - 10 })],            
             ['main', new Canvas(node, { width, height, zIndex })],
-            ['briefing', new Canvas(node, { width, height, zIndex: zIndex + 10 })],
+            ['score', new Canvas(node, { width, height, zIndex: zIndex + 10 })],
+            ['information', new Canvas(node, { width, height, zIndex: zIndex + 20 })],
         ])        
         
         this._layers.forEach(layer => layer.hide());
@@ -227,6 +242,18 @@ export class GameField extends AbstractGameField {
         ]
     }
 
+    private _getBallDirection() {
+        const radians =  Math.random() * (6.3 - 0) + 0;
+
+        const disabledAreas = this._settings.disabledBallDirectionAreas;
+
+        if (disabledAreas.some((area) => radians >= area[0] && radians <= area[1])) {
+            return this._getBallDirection()
+        }
+        
+        return radians;
+    }
+
     show() {
         this._layers.forEach(layer => layer.show())
     }
@@ -273,13 +300,32 @@ export class GameField extends AbstractGameField {
 
     }
 
-    clearBackground() {
-        this._layers.get('background').clear();
+    renderScore(score) {
+        const { width, height, score: scoreSettings, players } = this._settings;
+        const canvas = this._layers.get('score');
+        const startPoint = convertRelativePointToPoint(scoreSettings.start, width, height)
+        const endPoint = convertRelativePointToPoint(scoreSettings.end, width, height)
+        const scoreWidth = endPoint.x - startPoint.x;
+        const scoreLength = score.length;
+
+        canvas.clear();
+        canvas.show();
+        
+        score.forEach((value, index) => {
+            const color = players[index]['color']
+            
+            canvas.drawText(
+                value,
+                startPoint.x + index * ((index+1) / scoreLength) * scoreWidth - scoreSettings.fontSize / 10,
+                startPoint.y,
+                { size: scoreSettings.fontSize + 'px', color }
+            )
+        })
     }
-    
+
     renderBriefing() {
         const { width, height, briefing: { navigation }, inputsMap } = this._settings;
-        const canvas = this._layers.get('briefing');
+        const canvas = this._layers.get('information');
         canvas.clear();
         canvas.show();
 
@@ -291,9 +337,77 @@ export class GameField extends AbstractGameField {
             canvas.drawText(map.join(', '), x , y + 10, { size: '25px', align:  index === 0 ? 'left' : 'right', color })
         })
     }
+
+    async renderThrowNewBallScreen() {
+        const { width, height } = this._settings;
+        const canvas = this._layers.get('information');
+        canvas.clear()
+        canvas.show()
+
+        canvas.drawText(
+            'AGAIN',
+            width / 2 , 
+            height / 2 , 
+            { 
+                size: '45px', 
+                align: 'center', 
+                color: '#fff'
+            }
+        )
+
+        await timeout(2000);
+
+        canvas.clear()
+        canvas.hide()
+    }
+    
+    async renderGoalScreen() {
+        const { width, height } = this._settings;
+        const canvas = this._layers.get('information');
+
+        canvas.clear()
+        canvas.show()
+
+        canvas.drawText(
+            '!!!GOAL!!!',
+            width / 2 , 
+            height / 2 , 
+            { 
+                size: '45px', 
+                align: 'center', 
+                color: '#fff'
+            }
+        )
+
+        await timeout(2000);
+
+        canvas.clear()
+        canvas.hide()
+    }
+
+    clearBackground() {
+        this._layers.get('background').clear();
+    }
     
     clearBriefing() {
-        this._layers.get('briefing').clear();
+        this._layers.get('information').clear();
+    }
+    
+    throwBall(ball: IBall, speed) {
+        const { width, height, ball: { speed: speedDefault } } = this._settings;
+        const ballCoordinatesDimensions = convertAngleToCoordinatesChanges(this._getBallDirection());        
+
+        ball.setPosition({
+            x: width / 2 ,
+            y: height / 2,
+        });
+        ball.setDirection(
+            ballCoordinatesDimensions.dx,
+            ballCoordinatesDimensions.dy
+        )
+        ball.setSpeed(
+            speed ?? Math.round(width * speedDefault)
+        )
     }
 
     createObjects() {
@@ -303,9 +417,9 @@ export class GameField extends AbstractGameField {
         this._ball = new Ball({
             x: width / 2 ,
             y: height / 2,
-            dx: 1,
-            dy: 1,
-            speed: Math.round(width * ball.speed),
+            dx: 0,
+            dy: 0,
+            speed: 0,
             color: COLORS.ball.fill,
             radius: ballRadius,
 

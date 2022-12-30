@@ -26,6 +26,7 @@ export interface IGameField {
     createObjects(): IGameFieldObjects;
     resetObjects(): void;
 
+    throwBall(ball: AbstractBall, speed?: number): void;
     show(): void;
     hide(): void;
     clear(): void;

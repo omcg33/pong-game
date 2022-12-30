@@ -1,8 +1,13 @@
 import { IGameFieldParams, IGameField, Score, IGameFieldObjects } from "src/interfaces/gameField";
+import { AbstractBall } from "./objects/ball";
 
 export class AbstractGameField implements IGameField {
     constructor(params: IGameFieldParams) {      
     }
+    throwBall(ball: AbstractBall, speed?: number): void {
+        throw new Error("Method not implemented.");
+    }
+   
     createObjects(): IGameFieldObjects {
         throw new Error("Method not implemented.");
     }   

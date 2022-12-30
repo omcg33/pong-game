@@ -5,8 +5,11 @@ export interface IBall {
 
     getPosition(): Point;
     setPosition(point: Point): void;
-    setDirection(dx: number, dy: number): void;
+
     setSpeed(speed: number): void;
+    getSpeed(): number;
+
+    setDirection(dx: number, dy: number): void;
     updateDirection(vectorN: VectorN): void;
     
     draw(): void;

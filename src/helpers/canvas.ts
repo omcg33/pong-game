@@ -31,7 +31,7 @@ export class Canvas extends AbstractCanvas {
       }
 
     drawRectangle(x: number, y: number, width: number, height: number, options?: IRectangleParams): void {
-        const { radius = 0, fillColor } = options
+        const { radius = 0, fillColor } = options || {}
         // beginPath() начинает вектор
         this._ctx.beginPath()
 
@@ -68,7 +68,7 @@ export class Canvas extends AbstractCanvas {
     }
 
     drawLine(xS: number, yS: number, xE: number, yE: number, options?: ILineParams) {
-        const { color, width } = options;
+        const { color, width } = options || {};
 
         // Указываем, что линия будет с закруглениями на концах
         this._ctx.lineCap = 'round'

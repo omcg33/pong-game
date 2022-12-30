@@ -28,7 +28,7 @@ export class Ball extends AbstractBall {
     
     constructor(settings: IBallSettings) {
         super();
-        const { x, y, dx, dy, speed, radius, color, canvas, physics, } = settings;
+        const { x, y, dx, dy, speed, radius, color, canvas, physics } = settings;
                  
         this._dx = dx;
         this._dy = dy;
@@ -61,16 +61,16 @@ export class Ball extends AbstractBall {
         this._speed = speed;
     }
 
+    getSpeed() {
+        return this._speed;
+    }
+
     updateDirection(vectorN: VectorN) {
         const { x, y } = vectorN;
 
         if (x !== 0 ) this._dx *= -1;
         if (y !== 0 ) this._dy *= -1;
     }
-
-    // setLastTouchedPlayer(player) {
-    //     this.lastTouchedPlayer = player
-    // }
     
     move() {
         const position = this.getPosition()
@@ -84,6 +84,7 @@ export class Ball extends AbstractBall {
 
     draw() {
         const { x, y } = this.getPosition();
+
         this._canvas.drawCircle(
             x,
             y,

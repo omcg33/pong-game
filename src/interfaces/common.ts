@@ -1,3 +1,5 @@
+export type Radians = number;
+
 export type Point = {
     x: number;
     y: number;

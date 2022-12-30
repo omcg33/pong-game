@@ -2,6 +2,9 @@ import { Point, VectorN } from "src/interfaces/common";
 import { IBall } from "../../interfaces/objects/ball";
 
 export class AbstractBall implements IBall {
+    getSpeed(): number {
+        throw new Error("Method not implemented.");
+    }
     updateDirection(vectorN: VectorN): void {
         throw new Error("Method not implemented.");
     }
