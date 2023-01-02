@@ -3,7 +3,7 @@ import { AbstractGameField } from "../../abstracts/gameField";
 import { IGameFieldParams } from "../../interfaces/gameField";
 import { IPlayerSettings, Player } from "./objects/player";
 import { convertAngleToCoordinatesChanges, convertRelativePointToPoint, timeout } from "../../helpers";
-import { Ball } from "../four/objects/ball";
+import { Ball } from "./objects/ball";
 import { Wall } from "./objects/wall";
 import { ScoreTrigger } from "./objects/scoreTrigger";
 import { IBall } from "src/interfaces/objects/ball";
@@ -40,10 +40,16 @@ const COLORS = {
         },
         {
             main: '#00ff02'
+        },
+        {
+            main: 'yellow'
+        },
+        {
+            main: 'blue'
         }
     ],
     ball: {
-        fill: '#fff'
+        fill: 'red'
     }  
 };
 
@@ -88,8 +94,8 @@ export class GameField extends AbstractGameField {
             height,
             inputsMap,
             score: {
-                start: { x: 0.4, y: 0.05 },
-                end: { x: 0.6, y: 0.05 },
+                start: { x: 0.05, y: 0.05 },
+                end: { x: 0.25, y: 0.05 },
                 fontSize: 40,
             },
             players: [
@@ -106,6 +112,20 @@ export class GameField extends AbstractGameField {
                     size: 0.2,
                     speed: 5,
                     color: COLORS.players[1].main
+                },
+                {
+                    start: { x: 0.1, y: 0.1 },
+                    end: { x: 0.9, y: 0.1 },
+                    size: 0.2,
+                    speed: 5,
+                    color: COLORS.players[2].main
+                },
+                {
+                    start: { x: 0.1, y: 0.9 },
+                    end: { x: 0.9, y: 0.9},
+                    size: 0.2,
+                    speed: 5,
+                    color: COLORS.players[3].main
                 }
             ],
             briefing: {
@@ -117,6 +137,14 @@ export class GameField extends AbstractGameField {
                     {
                         start: { x: 0.9, y: 0.5 } ,
                         color: COLORS.players[1].main
+                    },
+                    {
+                        start: { x: 0.5, y: 0.1 },
+                        color: COLORS.players[2].main
+                    },
+                    {
+                        start: { x: 0.5, y: 0.9 } ,
+                        color: COLORS.players[3].main
                     }
                 ]
             },
