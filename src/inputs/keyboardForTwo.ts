@@ -1,7 +1,7 @@
 import { DIRECTION } from "../interfaces/enums";
 import { AbstractUsersInput } from "../abstracts/userInput";
 
-export class UsersKeyboardInput extends AbstractUsersInput {
+export class UsersKeyboardInputForTwo extends AbstractUsersInput {
     private _keysMap: any;
     private _inputs: DIRECTION[][];
     private _settings = [

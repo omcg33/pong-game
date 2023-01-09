@@ -73,7 +73,7 @@ export interface IGameFieldSettings {
     disabledBallDirectionAreas: Radians[][]
 }
 
-export class GameField extends AbstractGameField {   
+export class GameFieldFour extends AbstractGameField {   
     private _layers: Map<string, any>;
     private _settings: IGameFieldSettings;
 
@@ -95,7 +95,7 @@ export class GameField extends AbstractGameField {
             inputsMap,
             score: {
                 start: { x: 0.05, y: 0.05 },
-                end: { x: 0.25, y: 0.05 },
+                end: { x: 0.45, y: 0.05 },
                 fontSize: 40,
             },
             players: [
@@ -153,7 +153,7 @@ export class GameField extends AbstractGameField {
                 speed: 0.01
             },
             disabledBallDirectionAreas: [
-                [0, 0.6], [1.27, 1.87], [2.54, 3.74], [4.41, 5.01], [5.68, 6.28]
+                [0, 0.4], [1.27, 1.87], [2.74, 3.54], [4.41, 5.01], [5.88, 6.28]
             ]
         }
 
@@ -171,8 +171,9 @@ export class GameField extends AbstractGameField {
         const { width: fieldWidth, height: fieldHeight } = this._settings;
         const { start, end, size } = settings;
         
-        const width = fieldHeight * size * 0.1;
-        const height = fieldHeight * size;
+        const isVertical = start.y === end.y;
+        const width = isVertical ? fieldHeight * size * 0.1 : fieldHeight * size ;
+        const height = isVertical ? fieldHeight * size : ;
         const middleYposition = (start.y + (end.y - start.y) / 2) ;
 
         return {
@@ -299,7 +300,7 @@ export class GameField extends AbstractGameField {
     }
 
     renderBackground() {
-        const { width, height, players } = this._settings;
+        const { width, height, players, disabledBallDirectionAreas } = this._settings;
         const canvas = this._layers.get('background');
         canvas.show();
 
@@ -326,6 +327,17 @@ export class GameField extends AbstractGameField {
             )
         })
 
+        const length = 400;
+            
+        disabledBallDirectionAreas.forEach(area => {            
+            const min = area[0];
+            const max = area[1];
+
+            for (let i = min; i <= max; i+=0.01) {
+                canvas.drawLine( width / 2, height / 2, width / 2 + length * Math.sin(i),  height / 2 + length * Math.cos(i), { lineColor, lineWidth: 1 })
+            }
+        })
+
     }
 
     renderScore(score) {
@@ -341,10 +353,10 @@ export class GameField extends AbstractGameField {
         
         score.forEach((value, index) => {
             const color = players[index]['color']
-            
+           
             canvas.drawText(
                 value,
-                startPoint.x + index * ((index+1) / scoreLength) * scoreWidth - scoreSettings.fontSize / 10,
+                startPoint.x + (index / scoreLength) * scoreWidth + scoreSettings.fontSize / 2,
                 startPoint.y,
                 { size: scoreSettings.fontSize + 'px', color }
             )
@@ -439,7 +451,7 @@ export class GameField extends AbstractGameField {
     }
 
     createObjects() {
-        const { width, height, ball, } = this._settings;
+        const { width, height, ball } = this._settings;
         const ballRadius = Math.round(width * ball.radius);
 
         this._ball = new Ball({
@@ -454,6 +466,7 @@ export class GameField extends AbstractGameField {
             physics: this._physics,
             canvas: this._layers.get('main'),           
         });
+        
         this._players = this._settings.players.map(settings => this._createPlayer(settings));
         
         const triggers = this._createScoreTriggers(this._players, ballRadius );
